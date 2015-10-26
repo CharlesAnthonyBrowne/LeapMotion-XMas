@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Testing</title>
+
+  <style>
+    body{
+      margin: 0;
+      font-family: Helvetica;
+    }
+    canvas{
+      pointer-events: none;
+    }
+    #canvas_snow {
+    	display: block;
+    }
+    input{
+      cursor: pointer;
+    }
+    #connect-leap{
+      bottom: 0;
+      display: none;
+      visibility: hidden;
+    }
+
+    table, th, td {
+      border: 1px solid #aaa;
+    }
+    table {
+      border-collapse: collapse;
+    }
+    td, th {
+      vertical-align: top;
+      padding: 3px;
+    }
+    th {
+      color: #555;
+    }
+    #view-source {
+      position: absolute;
+      top: 0;
+      right: 0;
+      margin: 10px;
+    }
+  </style>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+  <script src="https://cloud.github.com/downloads/kopipejst/jqSnow/jquery.snow.min.1.0.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r73/three.min.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r68/three.min.js"></script>
+  <script src="http://js.leapmotion.com/leap-0.6.3.min.js"></script>
+  <script src="./main_plugin.js"></script>
+  <script src="http://js.leapmotion.com/leap.rigged-hand-0.1.5.min.js"></script>
+  <script src="./main.js"></script>
+
+</head>
+<body>
+
+  <script>
+  $(document).ready( function(){
+      $.fn.snow({ minSize: 2, maxSize: 35, newOn: 100, flakeColor: '#0099FF' });
+  });
+  </script>
+
+</body>
+<script>
+  // all units in mm
+  var initScene = function () {
+    window.scene = new THREE.Scene();
+    window.renderer = new THREE.WebGLRenderer({
+      alpha: true
+    });
+
+    window.renderer.setClearColor(0x000000, 0);
+    window.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    window.renderer.domElement.style.position = 'fixed';
+    window.renderer.domElement.style.top = 0;
+    window.renderer.domElement.style.left = 0;
+    window.renderer.domElement.style.width = '100%';
+    window.renderer.domElement.style.height = '100%';
+
+    document.body.appendChild(window.renderer.domElement);
+
+    window.scene.add(new THREE.AmbientLight(0x888888));
+
+    var pointLight = new THREE.PointLight(0xFFffff);
+    pointLight.position = new THREE.Vector3(-20, 10, 100);
+    pointLight.lookAt(new THREE.Vector3(0, 0, 0));
+    window.scene.add(pointLight);
+
+    window.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+    window.camera.position.fromArray([0, 160, 300]);
+    window.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    window.addEventListener('resize', function () {
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.render(scene, camera);
+
+    }, false);
+
+    scene.add(camera);
+
+
+    renderer.render(scene, camera);
+  };
+
+  initScene();
+
+
+
+
+  Leap.loop()
+  // note that transform must be _before_ rigged hand
+  .use('transform', {
+    quaternion: new THREE.Quaternion,
+    position: new THREE.Vector3,
+    scale: 0.4
+  })
+  .use('playback', {recording: 'finger-tap-54fps.json.lz'})
+  .use('riggedHand', {
+    dotsMode: false,
+    parent: scene,
+    renderFn: function(){
+      renderer.render(scene, camera);
+    }
+
+  })
+  .connect();
+
+  window.transformPlugin = Leap.loopController.plugins.transform;
+
+  document.getElementById('rotationInput').oninput = function(e){
+    var value = e.target.value;
+    transformPlugin.quaternion.setFromEuler(
+        new THREE.Euler(0, Math.PI * parseFloat(value,10) , 0)
+    );
+    document.getElementById('rotationOutput').innerHTML = value;
+  };
+
+  document.getElementById('positionInput').oninput = function(e){
+    var value = e.target.value;
+    transformPlugin.position.set(
+        0,0,parseInt(value, 10)
+    );
+    document.getElementById('positionOutput').innerHTML = value;
+  };
+
+  document.getElementById('scaleInput').oninput = function(e){
+    var value = parseFloat(e.target.value,10);
+    transformPlugin.scale.set(
+        value, value, value
+    );
+    document.getElementById('scaleOutput').innerHTML = value;
+  };
+
+  document.getElementById('showHide').onclick = function(){
+    var el = document.querySelector('canvas');
+    if (el.style.display == 'none'){
+      el.style.display = 'block'
+    }else {
+      el.style.display = 'none'
+    }
+  }
+
+  document.getElementById('view-source').href = 'view-source:' + window.location.href;
+  document.getElementById('view-source').target = "_blank";
+
+</script>
+
+</html>
