@@ -10,14 +10,14 @@ window.onload = function(){
 	canvas.height = H;
 
 	//snowflake particles
-	var mp = 25; //max particles
+	var mp = 125; //max particles
 	var particles = [];
 	for(var i = 0; i < mp; i++)
 	{
 		particles.push({
 			x: Math.random()*W, //x-coordinate
 			y: Math.random()*H, //y-coordinate
-			r: Math.random()*4+1, //radius
+			r: Math.random()*2+1, //radius
 			d: Math.random()*mp //density
 		})
 	}
@@ -33,7 +33,7 @@ window.onload = function(){
 		{
 			var p = particles[i];
 			ctx.moveTo(p.x, p.y);
-			ctx.arc(p.x, p.y, p.r, 0, Math.PI*2, true);
+			ctx.arc(p.x, p.y, p.r, 0, Math.PI*5, true);
 		}
 		ctx.fill();
 		update();

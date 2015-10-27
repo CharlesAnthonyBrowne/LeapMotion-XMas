@@ -1,0 +1,15 @@
+body{
+  margin: 0;
+  font-family: Helvetica;
+}
+canvas{
+  pointer-events: none;
+}
+#canvas_snow {
+  display: block;
+}
+#connect-leap{
+  bottom: 0;
+  display: none;
+  visibility: hidden;
+}
